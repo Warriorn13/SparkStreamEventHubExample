@@ -57,7 +57,13 @@ object StreamingWordCount {
       val data = rdd.map(record => new String(record.getBytes, StandardCharsets.UTF_8))
       val json = spark.read.schema(schema).json(data)
       json.createOrReplaceTempView("iot")
-      json.sqlContext.sql("select id, avg(temperature) as avg_temperature, count(*) as count from iot group by id").show()
+      json.sqlContext.sql("select id," +
+        "min(CAST(timestamp AS Timestamp)) as begin_time," +
+        "max(CAST(timestamp AS Timestamp)) as end_time," +
+        "avg(temperature) as avg_temperature," +
+        "min(temperature) as low_temperature," +
+        "max(temperature) as high_temperature," +
+        "count(*) as event_count from iot group by id").show()
     }
 
     ssc.start()
